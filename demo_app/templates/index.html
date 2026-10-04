@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Member Management</title>
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='/styles.css') }}"
+    >
+</head>
+<body>
+    <h1>Member Lookup</h1>
+    {% if error_message %}
+    <p data-state-code="{{ status_code }}">{{ error_message }}</p>
+    {% endif %}
+    {% if show_restore %}
+    <form action="/session/restore" method="post">
+        <button type="submit">Restore Session</button>
+    </form>
+    {% endif %}
+    <form action="/lookup" method="post">
+        <label for="member-id">Member ID</label>
+        <input
+            id="member-id"
+            name="member_id"
+            placeholder="Enter member ID..."
+        >
+        <button type="submit">Lookup</button>
+    </form>
+    <button type="button">Add</button>
+    <button type="button">Edit</button>
+    <button type="button">Delete</button>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Member Name</th>
+                <th scope="col">Savings Account</th>
+                <th scope="col">Checking Account</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for member_id, member in members.items() %}
+            <tr>
+                <td>{{ member_id }}</td>
+                <td>{{ member["name"] }}</td>
+                <td>{{ member["savings"] }}</td>
+                <td>{{ member["checking"] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

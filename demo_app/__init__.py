@@ -1,0 +1,1 @@
+"""Local demo banking application."""

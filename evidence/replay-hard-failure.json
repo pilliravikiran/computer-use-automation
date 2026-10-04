@@ -1,0 +1,22 @@
+{
+  "mode": "openai",
+  "status": "failure",
+  "output_names": [],
+  "outputs": {},
+  "code": "PERMISSION_DENIED",
+  "step_id": "step_2",
+  "recovered": false,
+  "message": "A declared hard failure matched the live page.",
+  "expected": {
+    "one_of": [
+      {
+        "strategy": "url",
+        "value": "/member/[REDACTED_ID]"
+      }
+    ]
+  },
+  "observed": {
+    "state_kind": "hard_failure",
+    "code": "PERMISSION_DENIED"
+  }
+}

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Member Details</title>
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='/styles.css') }}"
+    >
+</head>
+<body>
+    <h1>Member Details</h1>
+    <table>
+        <tbody>
+            <tr>
+                <th scope="row">Member ID</th>
+                <td>{{ member_id }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Member Name</th>
+                <td>{{ member["name"] }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Savings Account</th>
+                <td>{{ member["savings"] }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Checking Account</th>
+                <td>{{ member["checking"] }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <button type="button">Close Account</button>
+</body>
+</html>

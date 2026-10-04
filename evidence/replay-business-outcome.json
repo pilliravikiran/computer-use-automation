@@ -1,0 +1,22 @@
+{
+  "mode": "openai",
+  "status": "business_outcome",
+  "output_names": [],
+  "outputs": {},
+  "code": "MEMBER_NOT_FOUND",
+  "step_id": "step_2",
+  "recovered": false,
+  "message": "A declared business outcome matched the live page.",
+  "expected": {
+    "one_of": [
+      {
+        "strategy": "url",
+        "value": "/member/[REDACTED_ID]"
+      }
+    ]
+  },
+  "observed": {
+    "state_kind": "business_outcome",
+    "code": "MEMBER_NOT_FOUND"
+  }
+}

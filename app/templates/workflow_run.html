@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% if session.status in ["pending", "running"] %}<meta http-equiv="refresh" content="2">{% endif %}
+    <title>Workflow Run</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem auto; max-width: 900px; padding: 0 1rem; }
+        dl { display: grid; grid-template-columns: 12rem 1fr; gap: .7rem; }
+        dt { font-weight: bold; } dd { margin: 0; overflow-wrap: anywhere; }
+        .status { padding: 1rem; background: #eef5ff; border-left: .3rem solid #1769aa; }
+        .error { padding: 1rem; background: #ffe7e7; color: #8b0000; }
+        .result { padding: 1rem; background: #e8f8e8; }
+        li { margin: .45rem 0; }
+    </style>
+</head>
+<body>
+    <p><a href="/">← Start or view another run</a></p>
+    <h1>Workflow run</h1>
+    <div class="status">
+        <dl>
+            <dt>Status</dt><dd>{{ session.status }}</dd>
+            <dt>Current stage</dt><dd>{{ session.stage }}</dd>
+            <dt>Stage detail</dt><dd>{{ session.stage_detail }}</dd>
+            <dt>Goal</dt><dd>{{ session.goal }}</dd>
+            <dt>Run ID</dt><dd>{{ session.run_id }}</dd>
+        </dl>
+    </div>
+
+    {% if session.status == "paused" and session.current_intervention %}
+        <h2>Human action required</h2>
+        <p>{{ session.current_intervention.reason }}</p>
+        <p><a href="/operator/runs/{{ session.run_id }}">Open intervention controls</a></p>
+    {% endif %}
+
+    {% if session.error %}<div class="error"><h2>Error</h2><p>{{ session.error }}</p></div>{% endif %}
+
+    {% if session.result %}
+    <div class="result">
+        <h2>Final assignment result</h2>
+        <dl>
+            <dt>Mode</dt><dd>{{ session.result.mode }}</dd>
+            <dt>Artifact</dt><dd>{{ session.result.artifact_path }}</dd>
+            <dt>Version</dt><dd>{{ session.result.artifact_version }}</dd>
+            <dt>Saved steps</dt><dd>{{ session.result.artifact_steps }}</dd>
+            <dt>Replay member</dt><dd>{{ session.result.replay_member_id }}</dd>
+            <dt>Replay status</dt><dd>{{ session.result.replay_status }}</dd>
+            <dt>Outcome code</dt><dd>{{ session.result.outcome_code or "None" }}</dd>
+            <dt>Extracted outputs</dt><dd>{{ session.result.outputs }}</dd>
+            <dt>Evidence files</dt><dd>{{ session.result.evidence }}</dd>
+        </dl>
+    </div>
+    {% endif %}
+
+    <h2>Stage history</h2>
+    <ol>{% for item in session.stage_history %}<li>{{ item }}</li>{% endfor %}</ol>
+
+    {% if session.status in ["pending", "running"] %}
+        <p>This page refreshes every two seconds.</p>
+    {% endif %}
+</body>
+</html>

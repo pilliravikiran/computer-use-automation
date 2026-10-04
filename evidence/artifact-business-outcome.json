@@ -1,0 +1,191 @@
+{
+  "name": "member-savings-workflow",
+  "version": 6,
+  "application": {
+    "app_family": "demo-member-management",
+    "app_version": "1",
+    "entry_path": "/"
+  },
+  "inputs": [
+    {
+      "name": "member_id",
+      "value_type": "string",
+      "required": true,
+      "sensitive": true,
+      "description": "Runtime input; example values are never persisted."
+    }
+  ],
+  "outputs": [
+    {
+      "name": "savings_balance",
+      "value_type": "string",
+      "sensitive": true,
+      "description": "Extracted runtime output; values are not stored in the artifact."
+    }
+  ],
+  "steps": [
+    {
+      "step_id": "step_1",
+      "action": "type",
+      "target": {
+        "primary": {
+          "strategy": "role_name",
+          "value": "Member ID",
+          "role": "textbox",
+          "attribute": null
+        },
+        "fallbacks": [
+          {
+            "strategy": "text",
+            "value": "Member ID",
+            "role": null,
+            "attribute": null
+          }
+        ]
+      },
+      "value": "{{member_id}}",
+      "output_name": null,
+      "extract_mode": null,
+      "timeout_ms": 5000,
+      "max_attempts": 1,
+      "checkpoint": {
+        "one_of": [
+          {
+            "strategy": "url",
+            "value": "/"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": "step_2",
+      "action": "click",
+      "target": {
+        "primary": {
+          "strategy": "role_name",
+          "value": "Lookup",
+          "role": "button",
+          "attribute": null
+        },
+        "fallbacks": [
+          {
+            "strategy": "text",
+            "value": "Lookup",
+            "role": null,
+            "attribute": null
+          }
+        ]
+      },
+      "value": null,
+      "output_name": null,
+      "extract_mode": null,
+      "timeout_ms": 5000,
+      "max_attempts": 1,
+      "checkpoint": {
+        "one_of": [
+          {
+            "strategy": "url",
+            "value": "/member/{{member_id}}"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": "step_3",
+      "action": "extract",
+      "target": {
+        "primary": {
+          "strategy": "role_name",
+          "value": "Savings Account",
+          "role": "rowheader",
+          "attribute": null
+        },
+        "fallbacks": [
+          {
+            "strategy": "text",
+            "value": "Savings Account",
+            "role": null,
+            "attribute": null
+          }
+        ]
+      },
+      "value": null,
+      "output_name": "savings_balance",
+      "extract_mode": "labelled_value",
+      "timeout_ms": 5000,
+      "max_attempts": 1,
+      "checkpoint": {
+        "one_of": [
+          {
+            "strategy": "url",
+            "value": "/member/{{member_id}}"
+          }
+        ]
+      }
+    }
+  ],
+  "states": {
+    "business_outcomes": [
+      {
+        "code": "MEMBER_NOT_FOUND",
+        "detect": {
+          "strategy": "text",
+          "value": "No member found"
+        }
+      }
+    ],
+    "hard_failures": [
+      {
+        "code": "PERMISSION_DENIED",
+        "detect": {
+          "strategy": "text",
+          "value": "Permission denied"
+        }
+      }
+    ],
+    "recoverable_conditions": [
+      {
+        "code": "SESSION_EXPIRED",
+        "detect": {
+          "strategy": "text",
+          "value": "Session expired. Please sign in again."
+        },
+        "recovery": {
+          "action": "click",
+          "target": {
+            "primary": {
+              "strategy": "role_name",
+              "value": "Restore Session",
+              "role": "button",
+              "attribute": null
+            },
+            "fallbacks": []
+          },
+          "then": "restart_sequence",
+          "max_recoveries": 1
+        }
+      },
+      {
+        "code": "SYSTEM_NOTICE",
+        "detect": {
+          "strategy": "text",
+          "value": "System Notice"
+        },
+        "recovery": {
+          "action": "click",
+          "target": {
+            "primary": {
+              "strategy": "role_name",
+              "value": "Continue",
+              "role": "button",
+              "attribute": null
+            },
+            "fallbacks": []
+          },
+          "then": "recheck_checkpoint",
+          "max_recoveries": 1
+        }
+      }
+    ]
+  }
+}

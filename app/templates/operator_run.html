@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Operator Intervention</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; max-width: 800px; }
+        dl { display: grid; grid-template-columns: 10rem 1fr; gap: .75rem; }
+        dt { font-weight: bold; }
+        dd { margin: 0; }
+        .screenshot { padding: 2rem; background: #eeeeee; }
+        .actions { display: flex; gap: .75rem; margin-top: 1.5rem; }
+        button { padding: .65rem 1rem; }
+    </style>
+</head>
+<body>
+    <p><a href="/runs/{{ session.run_id }}/view">← Back to workflow status</a></p>
+    <h1>Human intervention required</h1>
+
+    <dl>
+        <dt>Goal</dt>
+        <dd>{{ session.goal }}</dd>
+
+        <dt>Run ID</dt>
+        <dd>{{ session.run_id }}</dd>
+
+        <dt>Capability</dt>
+        <dd>{{ intervention.capability }}</dd>
+
+        <dt>Current step</dt>
+        <dd>{{ intervention.step_id or "Not available" }}</dd>
+
+        <dt>Reason</dt>
+        <dd>{{ intervention.reason }}</dd>
+
+        <dt>Control owner</dt>
+        <dd>{{ session.control_owner }}</dd>
+    </dl>
+
+    <h2>Screenshot</h2>
+    {% if intervention.screenshot_url %}
+        <img src="{{ intervention.screenshot_url }}" alt="Current automation page">
+    {% else %}
+        <div class="screenshot">No screenshot captured yet.</div>
+    {% endif %}
+
+    <div class="actions">
+        <form method="post" action="/operator/runs/{{ session.run_id }}/take-control">
+            <button type="submit">Take Control</button>
+        </form>
+        <form method="post" action="/operator/runs/{{ session.run_id }}/resume">
+            <button type="submit">Resume Automation</button>
+        </form>
+        <form method="post" action="/operator/runs/{{ session.run_id }}/abort">
+            <button type="submit">Abort</button>
+        </form>
+    </div>
+</body>
+</html>

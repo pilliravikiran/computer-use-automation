@@ -1,0 +1,16 @@
+{
+  "mode": "openai",
+  "status": "success",
+  "output_names": [
+    "savings_balance"
+  ],
+  "outputs": {
+    "savings_balance": "[REDACTED]"
+  },
+  "code": null,
+  "step_id": null,
+  "recovered": false,
+  "message": null,
+  "expected": null,
+  "observed": null
+}

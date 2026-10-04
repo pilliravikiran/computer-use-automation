@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Computer-Use Assignment Workflow</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem auto; max-width: 900px; padding: 0 1rem; }
+        fieldset { margin: 1.5rem 0; padding: 1rem; }
+        label { display: block; margin: .8rem 0 .3rem; font-weight: bold; }
+        input[type="text"] { width: 18rem; padding: .55rem; }
+        .mode label { display: inline; font-weight: normal; margin-right: 1rem; }
+        button { padding: .7rem 1.1rem; font-weight: bold; }
+        .primary { background: #eaf3ff; border-left: .3rem solid #1769aa; padding: 1rem; }
+        .mock { background: #fff8dc; padding: .75rem; }
+        .error { background: #ffe7e7; color: #8b0000; padding: 1rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { text-align: left; border-bottom: 1px solid #ddd; padding: .6rem; }
+        code { overflow-wrap: anywhere; }
+    </style>
+</head>
+<body>
+    <h1>Complete Computer-Use Assignment Workflow</h1>
+    <p>
+        This normal application performs discovery on the member portal, compiles
+        and saves a versioned artifact, reloads it, and deterministically replays
+        it for a different member.
+    </p>
+
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+
+    <form method="post" action="/workflows/member-savings">
+        <fieldset>
+            <legend>1. Choose discovery mode</legend>
+            <div class="mode primary">
+                <input id="openai" type="radio" name="mode" value="openai" checked>
+                <label for="openai">Real OpenAI-guided discovery (primary assignment path)</label>
+                <p>API key configured: <strong>{{ "Yes" if openai_configured else "No" }}</strong></p>
+            </div>
+            <div class="mode mock">
+                <input id="mock" type="radio" name="mode" value="mock">
+                <label for="mock">Credential-free scripted model decisions</label>
+                <p>This still uses the real browser, recorder, compiler, saved artifact, and replay engine.</p>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>2. Enter the natural-language goal and target</legend>
+            <label for="goal">Goal</label>
+            <input
+                id="goal"
+                name="goal"
+                value="Look up the member and return the current savings balance."
+                required
+                style="width: 95%"
+            >
+
+            <label for="target_url">Target application URL</label>
+            <input id="target_url" name="target_url" value="http://localhost:8001" required>
+
+            <legend style="margin-top: 1.5rem">3. Enter typed capability inputs</legend>
+            <label for="discovery_member_id">Discovery member ID</label>
+            <input id="discovery_member_id" name="discovery_member_id" value="12345" required>
+
+            <label for="replay_member_id">Replay member ID (must be different)</label>
+            <input id="replay_member_id" name="replay_member_id" value="67890" required>
+        </fieldset>
+
+        <button type="submit">Start Complete Workflow</button>
+    </form>
+
+    <h2>What happens</h2>
+    <ol>
+        <li>Open and observe the member portal on port 8001.</li>
+        <li>Use the selected model provider to discover safe actions.</li>
+        <li>Record observations and compile portable targets/checkpoints.</li>
+        <li>Save and reload a new artifact version.</li>
+        <li>Replay it for the second member and extract the savings balance.</li>
+        <li>Complete the tracked run and clean up its browser.</li>
+    </ol>
+
+    {% if sessions %}
+    <h2>Recent runs</h2>
+    <table>
+        <thead><tr><th>Status</th><th>Stage</th><th>Goal</th><th>Open</th></tr></thead>
+        <tbody>
+        {% for session in sessions %}
+            <tr>
+                <td>{{ session.status }}</td>
+                <td>{{ session.stage }}</td>
+                <td>{{ session.goal }}</td>
+                <td><a href="/runs/{{ session.run_id }}/view">View run</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</body>
+</html>
