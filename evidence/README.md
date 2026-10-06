@@ -12,6 +12,8 @@ This directory contains reviewed evidence from genuine OpenAI-guided discovery r
 
 Discovery logs show the observe-decide-act sequence without storing typed values or page body text. Artifacts contain `{{member_id}}` rather than the example input. Replay files retain the status, output shape, state code, step, and checkpoint details while redacting output values and runtime record identifiers.
 
+Runs that use human takeover also create `human-actions-{run_id}.json`. It contains safe action metadata such as event type, element role, element name, and timestamp. It never stores the text entered by the operator, and identifiers are redacted before persistence.
+
 To generate fresh evidence, configure `OPENAI_API_KEY`, start the target app on port `8001`, and run:
 
 ```powershell

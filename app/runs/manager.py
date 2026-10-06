@@ -33,9 +33,11 @@ class RunManager:
         session.result = result
         session.status = RunStatus.COMPLETED
 
-    def fail_session(self, session: RunSession, error: str) -> None:
+    def fail_session(
+        self, session: RunSession, error: str, result: dict[str, object] | None = None
+    ) -> None:
         """Record an error and mark a run as failed."""
-        session.result = None
+        session.result = result
         session.error = error
         session.status = RunStatus.FAILED
 

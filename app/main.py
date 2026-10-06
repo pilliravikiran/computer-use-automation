@@ -165,7 +165,11 @@ async def operator_run(request: Request, run_id: str):
     return templates.TemplateResponse(
         request=request,
         name="operator_run.html",
-        context={"session": session, "intervention": session.current_intervention},
+        context={
+            "session": session,
+            "intervention": session.current_intervention,
+            "error": request.query_params.get("error"),
+        },
     )
 
 
@@ -197,12 +201,13 @@ async def resume_automation(run_id: str):
     if session.current_intervention is None:
         raise HTTPException(status_code=409, detail="No active intervention")
     if session.control_owner is not ControlOwner.HUMAN:
-        raise HTTPException(status_code=409, detail="Human does not own control")
+        return RedirectResponse(
+            url=f"/operator/runs/{run_id}?error=take-control-first", status_code=303
+        )
 
     session.control_owner = ControlOwner.RESUMING
     session.status = RunStatus.RUNNING
-    session.stage = "replaying"
-    session.stage_detail = "Human work submitted; replay is reclassifying the same live page."
+    session.stage_detail = "Human work submitted; automation is checking the same live page."
     session.stage_history.append(f"{session.stage}: {session.stage_detail}")
     session.control_event.set()
 
@@ -220,4 +225,4 @@ async def abort_run(run_id: str):
 
     intervention_manager.abort(session)
     await run_manager.release_terminal_surface(session)
-    return RedirectResponse(url=f"/operator/runs/{run_id}", status_code=303)
+    return RedirectResponse(url="/", status_code=303)

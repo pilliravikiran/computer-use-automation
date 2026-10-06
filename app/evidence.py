@@ -10,6 +10,7 @@ from urllib.parse import urlsplit, urlunsplit
 from app.config import EVIDENCE_DIRECTORY
 from app.discovery.recorder import RecordedStep
 from app.models.artifacts import AutomationArtifact
+from app.models.intervention import HumanAction
 from app.models.results import ReplayResult
 
 
@@ -107,5 +108,16 @@ class EvidenceWriter:
             "expected": redact_data(result.expected),
             "observed": redact_data(result.observed),
         }
+        path.write_text(json.dumps(record, indent=2, default=str), encoding="utf-8")
+        return path
+
+    def write_human_actions(self, actions: list[HumanAction]) -> Path:
+        """Persist safe metadata about actions performed during human control."""
+        path = EVIDENCE_DIRECTORY / f"human-actions-{self.run_id}.json"
+        action_records = []
+        for action in actions:
+            action_records.append(redact_data(action.model_dump(mode="json")))
+
+        record = {"mode": self.mode, "run_id": self.run_id, "actions": action_records}
         path.write_text(json.dumps(record, indent=2, default=str), encoding="utf-8")
         return path

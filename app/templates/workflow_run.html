@@ -36,7 +36,13 @@
 
     {% if session.error %}<div class="error"><h2>Error</h2><p>{{ session.error }}</p></div>{% endif %}
 
-    {% if session.result %}
+    {% if session.status == "aborted" %}
+    <div class="error">
+        <h2>Run aborted</h2>
+        <p>The operator stopped this run. The live Playwright browser was closed and no blocked action was executed by automation.</p>
+        <p>Outcome code: {{ session.result.code }}</p>
+    </div>
+    {% elif session.result %}
     <div class="result">
         <h2>Final assignment result</h2>
         <dl>

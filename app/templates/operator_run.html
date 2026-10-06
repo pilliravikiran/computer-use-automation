@@ -12,11 +12,18 @@
         .screenshot { padding: 2rem; background: #eeeeee; }
         .actions { display: flex; gap: .75rem; margin-top: 1.5rem; }
         button { padding: .65rem 1rem; }
+        .notice { padding: 1rem; background: #eef5ff; border-left: .3rem solid #1769aa; }
+        .error { padding: 1rem; background: #ffe7e7; color: #8b0000; }
+        button:disabled { cursor: not-allowed; opacity: .55; }
     </style>
 </head>
 <body>
     <p><a href="/runs/{{ session.run_id }}/view">← Back to workflow status</a></p>
     <h1>Human intervention required</h1>
+
+    {% if error == "take-control-first" %}
+        <div class="error">Click Take Control before resuming automation.</div>
+    {% endif %}
 
     <dl>
         <dt>Goal</dt>
@@ -45,13 +52,31 @@
         <div class="screenshot">No screenshot captured yet.</div>
     {% endif %}
 
+    {% if session.control_owner == "paused" %}
+        <div class="notice">
+            Automation is paused. Click <strong>Take Control</strong>, complete the required
+            action in the existing Playwright browser, and then return here to resume.
+        </div>
+    {% elif session.control_owner == "human" %}
+        <div class="notice">
+            You now control the existing Playwright browser. Complete the required action,
+            then click <strong>Resume Automation</strong>.
+        </div>
+    {% endif %}
+
     <div class="actions">
+        {% if session.control_owner == "paused" %}
         <form method="post" action="/operator/runs/{{ session.run_id }}/take-control">
             <button type="submit">Take Control</button>
         </form>
+        <button type="button" disabled title="Take control before resuming">Resume Automation</button>
+        {% elif session.control_owner == "human" %}
         <form method="post" action="/operator/runs/{{ session.run_id }}/resume">
             <button type="submit">Resume Automation</button>
         </form>
+        {% else %}
+        <button type="button" disabled>Control transfer in progress</button>
+        {% endif %}
         <form method="post" action="/operator/runs/{{ session.run_id }}/abort">
             <button type="submit">Abort</button>
         </form>

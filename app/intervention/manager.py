@@ -35,4 +35,12 @@ class InterventionManager:
         session.control_event.clear()
         session.control_owner = ControlOwner.PAUSED
         session.status = RunStatus.ABORTED
-        session.result = {"status": "aborted", "code": "OPERATOR_ABORTED"}
+        session.current_intervention = None
+        session.stage = "aborted"
+        session.stage_detail = "The operator aborted the run. The live browser was closed."
+        session.stage_history.append(f"{session.stage}: {session.stage_detail}")
+        session.result = {
+            "status": "aborted",
+            "code": "OPERATOR_ABORTED",
+            "human_actions": [action.model_dump(mode="json") for action in session.human_actions],
+        }

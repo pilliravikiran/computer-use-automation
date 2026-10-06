@@ -169,6 +169,7 @@ class MemberSavingsWorkflowService:
                 allowed_routes=settings.allowed_routes,
             )
             discovery_surface = WebSurfaceAdapter(headless=settings.headless)
+
             agent = DiscoveryAgent(
                 provider=provider,
                 surface=discovery_surface,
@@ -191,6 +192,7 @@ class MemberSavingsWorkflowService:
             discovery_evidence_path = evidence.write_discovery(recorder.steps)
             await discovery_surface.close()
             discovery_surface = None
+            session.surface = None
 
             self.update_stage(
                 session,
@@ -244,20 +246,30 @@ class MemberSavingsWorkflowService:
             )
             replay_evidence_path = evidence.write_replay(replay_result)
 
+            human_evidence_path = None
+            if session.human_actions:
+                human_evidence_path = evidence.write_human_actions(session.human_actions)
+
             if replay_result.status is ReplayStatus.HUMAN_REQUIRED:
                 raise RuntimeError(
                     "Tracked replay returned HUMAN_REQUIRED instead of waiting on its RunSession control gate."
                 )
-            if replay_result.status is ReplayStatus.FAILURE:
-                raise RuntimeError(
-                    f"Replay stopped with status {replay_result.status} and code {replay_result.code}"
-                )
 
-            self.update_stage(
-                session,
-                "completed",
-                "Discovery, artifact persistence, reload, and replay all completed.",
-            )
+            evidence_paths = {
+                "discovery": str(discovery_evidence_path.resolve()),
+                "artifact": str(artifact_evidence_path.resolve()),
+                "replay": str(replay_evidence_path.resolve()),
+            }
+            if human_evidence_path is not None:
+                evidence_paths["human_actions"] = str(human_evidence_path.resolve())
+
+            if replay_result.status is ReplayStatus.FAILURE:
+                failure_path = await replay_surface.capture_failure_evidence(
+                    EVIDENCE_DIRECTORY, f"failure-{session.run_id}"
+                )
+                if failure_path is not None:
+                    evidence_paths["failure"] = str(failure_path.resolve())
+
             result = {
                 "mode": request.mode,
                 "discovery_member_id": request.discovery_member_id,
@@ -269,12 +281,24 @@ class MemberSavingsWorkflowService:
                 "replay_status": replay_result.status,
                 "outcome_code": replay_result.code,
                 "outputs": replay_result.outputs,
-                "evidence": {
-                    "discovery": str(discovery_evidence_path.resolve()),
-                    "artifact": str(artifact_evidence_path.resolve()),
-                    "replay": str(replay_evidence_path.resolve()),
-                },
+                "replay_result": replay_result.model_dump(mode="json"),
+                "human_actions": [
+                    action.model_dump(mode="json") for action in session.human_actions
+                ],
+                "evidence": evidence_paths,
             }
+
+            if replay_result.status is ReplayStatus.FAILURE:
+                error = f"Replay stopped with code {replay_result.code} at {replay_result.step_id}"
+                self.update_stage(session, "failed", error)
+                self.run_manager.fail_session(session, error, result)
+                return
+
+            self.update_stage(
+                session,
+                "completed",
+                "Discovery, artifact persistence, reload, and replay all completed.",
+            )
             self.run_manager.complete_session(session, result)
         except asyncio.CancelledError:
             raise

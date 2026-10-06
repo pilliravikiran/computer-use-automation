@@ -135,6 +135,10 @@ For member `55550`:
 4. Return to the operator page and click **Resume Automation**.
 5. The same replay task checks the updated page and continues.
 
+If you click **Abort**, the run ends with `OPERATOR_ABORTED`, the Playwright browser closes, and the control app returns to the home page. **Resume Automation** remains disabled until **Take Control** has transferred ownership to the human.
+
+Safe metadata about the human's actions is written to `evidence/human-actions-{run_id}.json`. Typed values are not captured, and record identifiers are redacted before the file is saved.
+
 ## Command-line demonstrations
 
 Keep the port-`8001` application running before using these commands.
@@ -177,14 +181,13 @@ python -m app.smokes.normal_app_handoff_smoke
 }
 ```
 
-Use `GET /runs/{run_id}` to retrieve the status, current stage, stage history, structured result, artifact version, and evidence paths.
+Use `GET /runs/{run_id}` to retrieve the status, current stage, stage history, structured replay result, artifact version, human-action metadata, and evidence paths. Hard failures retain their code, failed step, expected checkpoint, and observed state in `result.replay_result`.
 
-## Run automated tests
+## Run code checks
 
 ```powershell
-python -m pytest -q
 python -m ruff check .
-python -m compileall -q app demo_app tests
+python -m compileall -q app demo_app
 ```
 
 The checked-in [`evidence`](evidence/README.md) directory contains redacted genuine OpenAI discovery and deterministic replay examples.
@@ -197,8 +200,7 @@ app/templates/       HTML pages used by the port-8000 control application
 app/smokes/          evaluator-facing end-to-end demonstrations
 demo_app/            local member-management target application
 evidence/            reviewed and redacted execution evidence
-tests/               focused automated tests
-README.md            setup, run, flow, and testing instructions
+README.md            setup, run, flow, and verification instructions
 ```
 
 Runtime artifacts are written to the ignored `artifacts/` directory. Local environments, `.env`, IDE settings, caches, and build output are also excluded from Git.
